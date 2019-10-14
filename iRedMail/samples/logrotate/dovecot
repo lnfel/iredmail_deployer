@@ -1,0 +1,17 @@
+PH_DOVECOT_LOG_DIR/*.log {
+    weekly
+    rotate 10
+    missingok
+    compress
+    delaycompress
+
+    # Use bzip2 for compress.
+    #compresscmd bzip2
+    #uncompresscmd bunzip2
+    #compressoptions -9
+    #compressext .bz2
+
+    postrotate
+        PH_SYSLOG_POSTROTATE_CMD
+    endscript
+}

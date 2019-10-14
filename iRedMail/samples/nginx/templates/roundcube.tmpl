@@ -1,0 +1,13 @@
+# Roundcube webmail
+location ~ ^/mail(.*)\.php$ {
+    include PH_NGINX_CONF_TMPL_DIR/hsts.tmpl;
+    include PH_NGINX_CONF_TMPL_DIR/fastcgi_php.tmpl;
+    fastcgi_param SCRIPT_FILENAME PH_RCM_HTTPD_ROOT_SYMBOL_LINK$1.php;
+}
+
+location ~ ^/mail(.*) {
+    alias PH_RCM_HTTPD_ROOT_SYMBOL_LINK$1;
+    index index.php;
+}
+
+location ~ ^/mail/(bin|SQL|README|INSTALL|LICENSE|CHANGELOG|UPGRADING)$ { deny all; }

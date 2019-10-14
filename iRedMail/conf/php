@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# Author: Zhang Huangbin (zhb _at_ iredmail.org)
+
+#---------------------------------------------------------------------
+# This file is part of iRedMail, which is an open source mail server
+# solution for Red Hat(R) Enterprise Linux, CentOS, Debian and Ubuntu.
+#
+# iRedMail is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# iRedMail is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with iRedMail.  If not, see <http://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------
+
+# path to php program
+export PHP_BIN='/usr/bin/php'
+
+# Path used to store php sessions (session.save_path)
+export PHP_SESSION_SAVE_PATH='/var/lib/php/sessions'
+
+# php-fpm
+export PHP_FPM_RC_SCRIPT_NAME='php-fpm'
+export PHP_FPM_SOCKET='/var/run/php-fpm.socket'
+export PHP_FPM_POOL_WWW_CONF='/etc/php-fpm.d/www.conf'
+
+# Disabled PHP functions.
+#   - Roundcube plugin `enigma` requires: proc_open, proc_close, escapeshellarg.
+export PHP_DISABLE_FUNCTIONS='apache_setenv,posix_uname,eval,pcntl_wexitstatus,posix_getpwuid,xmlrpc_entity_decode,pcntl_wifstopped,pcntl_wifexited,pcntl_wifsignaled,phpAds_XmlRpc,pcntl_strerror,ftp_exec,pcntl_wtermsig,mysql_pconnect,php_uname,proc_nice,pcntl_sigtimedwait,posix_kill,pcntl_sigprocmask,fput,phpinfo,system,phpAds_remoteInfo,ftp_login,inject_code,posix_mkfifo,highlight_file,escapeshellcmd,show_source,pcntl_wifcontinued,fp,pcntl_alarm,pcntl_wait,ini_alter,posix_setpgid,parse_ini_file,ftp_raw,pcntl_waitpid,pcntl_getpriority,ftp_connect,pcntl_signal_dispatch,pcntl_wstopsig,apache_child_terminate,ini_restore,ftp_put,passthru,proc_terminate,posix_setsid,pcntl_signal,pcntl_setpriority,proc_get_status,phpAds_xmlrpcEncode,pcntl_exec,ftp_nb_fput,ftp_get,phpAds_xmlrpcDecode,pcntl_sigwaitinfo,shell_exec,pcntl_get_last_error,ftp_rawlist,pcntl_fork,posix_setuid'
+
+# Uses PHP 7.x
+export PHP_7='NO'
+
+if [ X"${DISTRO}" == X'RHEL' ]; then
+    export PHP_INI='/etc/php.ini'
+
+elif [ X"${DISTRO}" == X'DEBIAN' -o X"${DISTRO}" == X'UBUNTU' ]; then
+    if [ X"${DISTRO_CODENAME}" == X'jessie' -o X"${DISTRO_CODENAME}" == X'trusty' ]; then
+        [ X"${WEB_SERVER}" == X'APACHE' ] && export PHP_INI='/etc/php5/apache2/php.ini'
+        [ X"${WEB_SERVER}" == X'NGINX' ] && export PHP_INI='/etc/php5/fpm/php.ini'
+
+        export PHP_INI_CONF_DIR='/etc/php5/apache2/conf.d/'
+        export PHP_FPM_POOL_WWW_CONF='/etc/php5/fpm/pool.d/www.conf'
+        export PHP_FPM_RC_SCRIPT_NAME='php5-fpm'
+        export PHPENMOD_BIN='php5enmod'
+    else
+        [ X"${WEB_SERVER}" == X'APACHE' ] && export PHP_INI='/etc/php/7.0/cli/php.ini'
+        [ X"${WEB_SERVER}" == X'NGINX' ] && export PHP_INI='/etc/php/7.0/fpm/php.ini'
+
+        export PHP_INI_CONF_DIR='/etc/php/7.0/cli/conf.d/'
+        export PHP_FPM_POOL_WWW_CONF='/etc/php/7.0/fpm/pool.d/www.conf'
+        export PHP_FPM_RC_SCRIPT_NAME="php7.0-fpm"
+        export PHPENMOD_BIN='phpenmod'
+    fi
+
+    if [ X"${DISTRO_CODENAME}" == X'xenial' ]; then
+        export PHP_7='YES'
+    fi
+elif [ X"${DISTRO}" == X'FREEBSD' ]; then
+    export PHP_BIN='/usr/local/bin/php'
+
+    # Copy from example: /usr/local/etc/php.ini-production
+    export PHP_INI='/usr/local/etc/php.ini'
+    export PHP_FPM_POOL_WWW_CONF='/usr/local/etc/php-fpm.d/www.conf'
+
+elif [ X"${DISTRO}" == X'OPENBSD' ]; then
+    export OB_PHP_VERSION='7.0'
+
+    export PHP_BIN="/usr/local/bin/php-${OB_PHP_VERSION}"
+    export PHP_INI="/etc/php-${OB_PHP_VERSION}.ini"
+    export PHP_FPM_RC_SCRIPT_NAME='php70_fpm'
+    export PHP_FPM_POOL_WWW_CONF='/etc/php-fpm.conf'
+    export PHP_FPM_SOCKET="${HTTPD_SERVERROOT}/run/php-fpm.socket"
+fi
+
+# connection type: mysql, mysqli (recommended for MySQL/MariaDB), pgsql.
+export PHP_CONN_TYPE='mysqli'
+[ X"${BACKEND}" == X'PGSQL' ] && export PHP_CONN_TYPE='pgsql'
